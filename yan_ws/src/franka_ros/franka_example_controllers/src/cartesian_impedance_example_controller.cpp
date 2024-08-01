@@ -162,30 +162,41 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.rotation());
   Eigen::Matrix<double, 6, 1> velocity =jacobian * dq;
-
-  // compute error to desired pose
-  // position error
-  Eigen::Matrix<double, 6, 1> error;
-  error.head(3) << position - position_d_;
   
-  if(recording == false){
-    std::cout << "Please enter the demonstration number:" << std::endl;
+  if(recording == false && reproduction == false){
+    std::cout << "Please enter the demonstration number or type 99 to run reproduced trajectory:" << std::endl;
     std::cin >> demo_num;
-    std::cout << "Your demos dumber is " << demo_num << std::endl;
-    std::string filename = "/home/panda/YanQu/MA/Demo_data/follower_"+std::to_string(demo_num)+".txt";
-    follower_file.open(filename);
-    if (!follower_file){
-      ROS_ERROR("Failed to write the data");
-      //return false;
+    if (demo_num == 99)
+    {
+      std::cout << "Reproduction running" << std::endl;
+      reproduction = true;
+    }else{
+      std::cout << "Your demos dumber is " << demo_num << std::endl;
+      std::string filename = "/home/panda/YanQu/MA/Demo_data_2/follower_"+std::to_string(demo_num)+".txt";
+      follower_file.open(filename);
+      if (!follower_file){
+        ROS_ERROR("Failed to write the data");
+        //return false;
+      }
+      follower_file << "Xl_x\tXl_y\tXl_z\tVl_x\tVl_y\tVl_z\n";
+      recording = true;
     }
-    follower_file << "Xl_x\tXl_y\tXl_z\tVl_x\tVl_y\tVl_z\n";
-    recording = true;
   }
-  // // record the position
+  // record the position and velocity
   if (follower_file.is_open() && recording == true){
     std::cout << "Recording position and velocities" <<std::endl;
     follower_file << position[0] << "\t" << position[1] << "\t" << position[2] << "\t" << velocity[0] << "\t" << velocity[1]<< "\t" << velocity[2]<<"\n";
   }
+  
+  if (reproduction == true){
+    // SEDS
+    // generate position_d_
+  }
+  
+  // compute error to desired pose
+  // position error
+  Eigen::Matrix<double, 6, 1> error;
+  error.head(3) << position - position_d_;
 
   // orientation error
   if (orientation_d_.coeffs().dot(orientation.coeffs()) < 0.0) {
@@ -218,7 +229,11 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   tau_d << tau_task + tau_nullspace + coriolis;
   // Saturate torque rate to avoid discontinuities
   tau_d << saturateTorqueRate(tau_d, tau_J_d);
-  tau_d.setZero();
+  
+  // Kinematic operation to record data
+  if(recording == true){
+    tau_d.setZero();
+  }
 
   for (size_t i = 0; i < 7; ++i) {
     joint_handles_[i].setCommand(tau_d(i));

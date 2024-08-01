@@ -72,6 +72,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   std::ofstream follower_file;
   int demo_num{0};
   bool recording = false;
+  bool reproduction =false;
 };
 
 }  // namespace franka_example_controllers
