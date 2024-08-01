@@ -99,7 +99,6 @@ elseif M == 3
         % Simulate trajectories and plot them on top
         if plot_repr
             [hr] = plot3(x_sim(1,:),x_sim(2,:),x_sim(3,:),'k.','markersize',10); hold on;
-            fprintf('Yes \n');
         end
         axis equal        
     end

@@ -24,7 +24,7 @@ ax_x=linspace(axlim(1),axlim(2),nx); %computing the mesh points along each axis
 ax_y=linspace(axlim(3),axlim(4),ny); %computing the mesh points along each axis
 ax_z=linspace(axlim(5),axlim(6),nz); %computing the mesh points along each axis
 [x_tmp, y_tmp, z_tmp]=meshgrid(ax_x,ax_y, ax_z); %meshing the input domain
-x=[x_tmp(:), y_tmp(:), z_tmp(:)]';
+x=[x_tmp(:), y_tmp(:), z_tmp(:)];
 xd = feval(ds, x);
 fprintf('done\n');
 

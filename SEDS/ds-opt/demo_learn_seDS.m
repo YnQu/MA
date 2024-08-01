@@ -43,9 +43,9 @@
 close all; clear all; clc
 %pkg_dir         = '/home/nbfigueroa/Dropbox/PhD_papers/CoRL-2018/code/ds-opt/';
 pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
-chosen_dataset  = 8; 
-sub_sample      = 3; % '>2' for real 3D Datasets, '1' for 2D toy datasets
-nb_trajectories = 15; % Only for real 3D data
+chosen_dataset  = 12;% '12' for my own data 
+sub_sample      = 10; % '>2' for real 3D Datasets, '1' for 2D toy datasets
+nb_trajectories = 9; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
@@ -138,7 +138,7 @@ ds_plot_options.sim_traj  = 1;            % To simulate trajectories from x0_all
 ds_plot_options.x0_all    = x0_all;       % Intial Points
 ds_plot_options.init_type = 'ellipsoid';  % For 3D DS, to initialize streamlines
                                           % 'ellipsoid' or 'cube'  
-ds_plot_options.nb_points = 30;           % No of streamlines to plot (3D)
+ds_plot_options.nb_points = 20;           % No of streamlines to plot (3D)
 ds_plot_options.plot_vol  = 1;            % Plot volume of initial points (3D)
 
 [hd, hs, hr, x_sim] = visualizeEstimatedDS(Data(1:M,:), ds_seds, ds_plot_options);
