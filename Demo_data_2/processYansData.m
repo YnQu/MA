@@ -1,9 +1,9 @@
 close all; clear all; clc
 
 % Define the filenames
-nbSamples = 9;
+nbSamples = 11;
 filenames = cell(length(nbSamples),1);
-dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data/';
+dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data_2/';
 for n = 1:nbSamples
     filenames{n} = [dataset_path 'follower_' num2str(n) '.txt'];
 end
@@ -18,7 +18,7 @@ for i = 1:length(filenames)
 
     % Select the columns Xl_x, Xl_y, and Xl_z
     selectedData = T{:, {'Xl_x', 'Xl_y', 'Xl_z', 'Vl_x', 'Vl_y', 'Vl_z'}}';
-    selectedData = selectedData(:,2000:end-1000);
+    selectedData = selectedData(:,1500:end);
 
     % Store the matrix in the cell array
     data{i} = selectedData;

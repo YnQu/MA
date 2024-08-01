@@ -64,7 +64,7 @@ else
     data_ = load(strcat(pkg_dir,'/datasets/',dataset_name));% strcat() returns the path to dataset
     % dt = data_.dt;
     data_ = data_.data;
-    N = length(data_);% N is the #traj - 1
+    N = length(data_); % N is the #traj - 1
     data = []; 
     traj = randsample(N, nb_trajectories)';
     for l=1:nb_trajectories
