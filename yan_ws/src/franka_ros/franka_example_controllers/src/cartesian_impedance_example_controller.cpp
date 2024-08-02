@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <memory>
+#include <sstream>
 
 #include <controller_interface/controller_base.h>
 #include <franka/robot_state.h>
@@ -103,6 +104,11 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   cartesian_stiffness_.setZero();
   cartesian_damping_.setZero();
 
+  // init SEDS 
+  //Prior.setZero();
+  //Mu.setZero();
+  //Sigma_flatten.setZero();
+
   return true;
 }
 
@@ -126,21 +132,16 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
   // set nullspace equilibrium configuration to initial q
   q_d_nullspace_ = q_initial;
 
-  // //if(recording == false){
-  // //  recording = true;
-  //   std::cout << "Please enter the demonstration number:";
-  //   std::cin >> demo_num;
-
-  //   if(demo_num != 0){
-  //     std::string filename = "/home/panda/YanQu/Master_Thesis/catkin_ws/build/Follower_Data/follower_"+std::to_string(demo_num)+".txt";
-  //     follower_file.open(filename);
-  //     if (!follower_file){
-  //       ROS_ERROR("Failed to write the data");
-  //       //return false;
-  //     }
-  //     follower_file << "Xl_x Xl_y Xl_z\n";
-  // }  
-  // //}
+  // read Prior, Mu and Sigma
+  std::vector<double> Prior_ = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 6, 1);
+  std::vector<double> Mu_ = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 6);
+  std::vector<double> Sigma_ = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
+  
+  // Assuming Priors is a 6x1 vector, Mu is a 6x6 matrix, and flatSigma is a 36x3 matrix.
+  Eigen::Map<Eigen::Matrix<double, 6, 1>> Prior(Prior_.data());
+  Eigen::Map<Eigen::Matrix<double, 6, 6>> Mu(Mu_.data());
+  Eigen::Map<Eigen::Matrix<double, 36, 3>> Sigma(Sigma_.data());
+  
 }
 
 void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
@@ -188,6 +189,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     follower_file << position[0] << "\t" << position[1] << "\t" << position[2] << "\t" << velocity[0] << "\t" << velocity[1]<< "\t" << velocity[2]<<"\n";
   }
   
+  // reproduce the trajectory
   if (reproduction == true){
     // SEDS
     // generate position_d_
@@ -264,6 +266,21 @@ Eigen::Matrix<double, 7, 1> CartesianImpedanceExampleController::saturateTorqueR
         tau_J_d[i] + std::max(std::min(difference, delta_tau_max_), -delta_tau_max_);
   }
   return tau_d_saturated;
+}
+
+std::vector<double> readCsv(const std::string& filename, int numRows, int numCols) {
+    std::vector<double> matrix;
+    matrix.reserve(numRows * numCols);
+    std::ifstream file(filename);
+    double num;
+
+    while (file >> num) {
+        matrix.push_back(num);
+        // Skip the comma
+        file.ignore();
+    }
+
+    return matrix;
 }
 
 void CartesianImpedanceExampleController::complianceParamCallback(

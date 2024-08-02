@@ -35,6 +35,8 @@ vector
 -
 fstream
 -
+iostream
+-
 controller_interface/multi_interface_controller.h
 -
 dynamic_reconfigure/server.h
@@ -72,6 +74,8 @@ franka_example_controllers/cartesian_impedance_example_controller.h
 cmath
 -
 memory
+-
+sstream
 -
 controller_interface/controller_base.h
 -

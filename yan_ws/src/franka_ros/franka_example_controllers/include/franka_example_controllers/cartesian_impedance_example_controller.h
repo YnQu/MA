@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 #include <controller_interface/multi_interface_controller.h>
 #include <dynamic_reconfigure/server.h>
@@ -42,6 +43,8 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
 
+  std::vector<double> readCsv(const std::string& filename, int numRows, int numCols);
+
   double filter_params_{0.005};
   double nullspace_stiffness_{20.0};
   double nullspace_stiffness_target_{20.0};
@@ -56,6 +59,11 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   std::mutex position_and_orientation_d_target_mutex_;
   Eigen::Vector3d position_d_target_;
   Eigen::Quaterniond orientation_d_target_;
+
+  // SEDS Parameters
+  //Eigen::Matrix<double, 6, 1> Prior;
+  //Eigen::Matrix<double, 6, 6> Mu;
+  //Eigen::Matrix<double, 36, 3> Sigma_flatten;
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
