@@ -42,14 +42,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 close all; clear all; clc
 %pkg_dir         = '/home/nbfigueroa/Dropbox/PhD_papers/CoRL-2018/code/ds-opt/';
-pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
+%pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
+pkg_dir         = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt';
 chosen_dataset  = 12; 
 sub_sample      = 10; % '>2' for real 3D Datasets, '1' for 2D toy datasets
 nb_trajectories = 11; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
-vel_samples = 15; vel_size = 0.5; 
+vel_samples = 10; vel_size = 0.5; 
 [h_data, h_att, h_vel] = plot_reference_trajectories_DS(Data, att, vel_samples, vel_size);
 limits = axis;
 
@@ -104,7 +105,6 @@ end
 % Finding an initial guess for GMM's parameter
 [Priors0, Mu0, Sigma0] = initialize_SEDS([Xi_ref; Xi_dot_ref],nb_gaussians);
 
-
 %%  Visualize Gaussian Components and labels on clustered trajectories
 % Plot Initial Estimate 
 [~, est_labels] =  my_gmm_cluster([Xi_ref; Xi_dot_ref], Priors0, Mu0, Sigma0, 'hard', []);
@@ -128,8 +128,17 @@ options.objective     = 'likelihood';    % 'mse'/'likelihood'
 sub_sample            = 1;
 
 %running SEDS optimization solver
-[Priors, Mu, Sigma]= SEDS_Solver(Priors0,Mu0,Sigma0,[Xi_ref(:,1:sub_sample:end); Xi_dot_ref(:,1:sub_sample:end)],options); 
+[Priors, Mu, Sigma]= SEDS_Solver(Priors0,Mu0,Sigma0,[Xi_ref(:,1:sub_sample:end); Xi_dot_ref(:,1:sub_sample:end)],options);
+
+%% %%%%%%%%%%%    Export Prior, Mu and Sigama  %%%%%%%%%%
+export_path = '/Users/yanqu/Desktop/Thesis/MA/Learn_data/';
+csvwrite([export_path 'priors.csv'], Priors);
+csvwrite([export_path 'mu.csv'], Mu);
+Sigma2D = reshape(Sigma, [], size(Sigma, 3));
+csvwrite([export_path 'sigma.csv'], Sigma2D);
+
 ds_seds = @(x) GMR_SEDS(Priors,Mu,Sigma,x-repmat(att,[1 size(x,2)]),1:M,M+1:2*M);
+%[guess_mean, guess_cova] = GMR_SEDS(Priors,Mu,Sigma,x0_all-repmat(att,[1 size(x0_all,2)]),1:M,M+1:2*M);
 
 %% %%%%%%%%%%%%    Plot Resulting DS  %%%%%%%%%%%%%%%%%%%
 % Fill in plotting options
@@ -138,7 +147,7 @@ ds_plot_options.sim_traj  = 1;            % To simulate trajectories from x0_all
 ds_plot_options.x0_all    = x0_all;       % Intial Points
 ds_plot_options.init_type = 'ellipsoid';  % For 3D DS, to initialize streamlines
                                           % 'ellipsoid' or 'cube'  
-ds_plot_options.nb_points = 30;           % No of streamlines to plot (3D)
+ds_plot_options.nb_points = 10;           % No of streamlines to plot (3D)
 ds_plot_options.plot_vol  = 1;            % Plot volume of initial points (3D)
 
 [hd, hs, hr, x_sim] = visualizeEstimatedDS(Data(1:M,:), ds_seds, ds_plot_options);

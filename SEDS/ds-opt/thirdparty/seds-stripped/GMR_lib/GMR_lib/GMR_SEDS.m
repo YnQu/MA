@@ -99,10 +99,12 @@ end
 %   Pxi(:,i) = gaussPDF(x, Mu(in,i), Sigma(in,in,i));
 % end
 % beta = (Pxi./repmat(sum(Pxi,2)+realmin,1,nbStates))';
+
 % %% Compute expected output distribution, given input x
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % y = zeros(length(out), nbData);
 % Sigma_y = zeros(length(out), length(out), nbData);
+
 % for i=1:nbData
 %   % Compute expected means y, given input x
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,6 +112,7 @@ end
 %     yj_tmp = Mu(out,j) + Sigma(out,in,j)*inv(Sigma(in,in,j)) * (x(:,i)-Mu(in,j));
 %     y(:,i) = y(:,i) + beta(j,i).*yj_tmp;
 %   end
+
 %   % Compute expected covariance matrices Sigma_y, given input x
 %   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   for j=1:nbStates

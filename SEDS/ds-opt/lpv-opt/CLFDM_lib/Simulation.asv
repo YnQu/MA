@@ -15,7 +15,7 @@ function [x xd t xT x_obs]=Simulation(x0,xT,fn_handle,varargin)
 %       [x xd t]=Simulation(x0,xT,Priors,Mu,Sigma,options)
 %
 % to also send a structure of desired options.
-% 
+%
 % Inputs -----------------------------------------------------------------
 %   o x:       d x N matrix vector representing N different starting point(s)
 %   o xT:      d x 1 Column vector representing the target point

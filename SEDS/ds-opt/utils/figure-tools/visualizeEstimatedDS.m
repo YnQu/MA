@@ -26,8 +26,8 @@ end
 % Simulate trajectories and plot them on top
 if plot_repr
     opt_sim = [];
-    opt_sim.dt = 0.01;   
-    opt_sim.i_max = 10000;
+    opt_sim.dt = 0.001;   
+    opt_sim.i_max = 100000;
     opt_sim.tol = 0.005;
     opt_sim.plot = 0;
     [x_sim, ~] = Simulation(x0_all ,[],ds_fun, opt_sim);
@@ -87,8 +87,7 @@ elseif M == 3
     else
         % Plot Demonstrations in red
         [hd] = plot3(Xi_ref(1,:),Xi_ref(2,:),Xi_ref(3,:),'r.','markersize',10); hold on;
-        
-        
+       
         % Compute Start Locations for Streamlines
         start_pnts =  sample_initial_points(x0_all, nb_pnts, init_type, plot_volume);
         limits = axis;
@@ -99,7 +98,7 @@ elseif M == 3
         % Simulate trajectories and plot them on top
         if plot_repr
             [hr] = plot3(x_sim(1,:),x_sim(2,:),x_sim(3,:),'k.','markersize',10); hold on;
-            fprintf('Yes \n');
+            
         end
         axis equal        
     end
