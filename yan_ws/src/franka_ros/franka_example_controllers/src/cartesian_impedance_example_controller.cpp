@@ -153,7 +153,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.rotation());
-  Eigen::Matrix<double, 6, 1> velocity =jacobian * dq;
+  Eigen::Matrix<double, 6, 1> velocity = jacobian * dq;
 
   // Read Prior, Mu and Sigma
   std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
@@ -223,7 +223,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       //std::cout<< "Sigma_inv: "<< topLeft.inverse()<< std::endl;
       prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
       //std::cout<< "prob: "<< prob<< std::endl;
-      Pxi[i] = prob;
+      Pxi[i] = Prior[i]* prob;
     }
     double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
     beta = Pxi / sumPxi;
@@ -241,19 +241,16 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     {
       Eigen::VectorXd yj_tmp = Mu.transpose().col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
                                   Sigma[j].topLeftCorner(3, 3).inverse() * (position - Mu.transpose().col(j).head(3));
-      velocity_d += beta(j) * yj_tmp;
+      velocity_d = velocity_d + beta(j) * yj_tmp;
     }
-
-    std::cout<< velocity_d << std::endl;
 
     for (int d = 0; d < 3; d++)
     {
-      position_d_[d] = position_d_[d] + velocity_d[d] * 0.001;
+      position_d_[d] = position[d] + velocity_d[d]*0.07;
     }
-
+    std::cout<< "velocity_d: "<< velocity_d[0]<<" "<< velocity_d[1]<<" "<< velocity_d[2] << std::endl;
     std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
-    std::cout<< "position: "<< position[0]<<" "<< position[1]<<" "<< position[2]<< std::endl;
-    
+    std::cout<< "position: "<< position[0]<<" "<< position[1]<<" "<< position[2]<< std::endl;    
   }
   
   // compute error to desired pose
