@@ -33,6 +33,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   void starting(const ros::Time&) override;
   void update(const ros::Time&, const ros::Duration& period) override;
 
+
  private:
   // Saturation
   Eigen::Matrix<double, 7, 1> saturateTorqueRate(
@@ -42,8 +43,6 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   std::unique_ptr<franka_hw::FrankaStateHandle> state_handle_;
   std::unique_ptr<franka_hw::FrankaModelHandle> model_handle_;
   std::vector<hardware_interface::JointHandle> joint_handles_;
-
-  std::vector<double> readCsv(const std::string& filename, int numRows, int numCols);
 
   double filter_params_{0.005};
   double nullspace_stiffness_{20.0};
@@ -61,9 +60,9 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   Eigen::Quaterniond orientation_d_target_;
 
   // SEDS Parameters
-  //Eigen::Matrix<double, 6, 1> Prior;
-  //Eigen::Matrix<double, 6, 6> Mu;
-  //Eigen::Matrix<double, 36, 3> Sigma_flatten;
+  Eigen::Matrix<double, 3, 1> Prior;
+  Eigen::Matrix<double, 6, 3> Mu;
+  Eigen::Matrix<double, 36, 3> Sigma_flatten;
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
@@ -81,6 +80,9 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   int demo_num{0};
   bool recording = false;
   bool reproduction =false;
+
 };
 
 }  // namespace franka_example_controllers
+
+std::vector<double> readCsv(const std::string& filename, int numRows, int numCols);

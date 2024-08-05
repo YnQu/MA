@@ -5,6 +5,7 @@
 #include <cmath>
 #include <memory>
 #include <sstream>
+#include <limits>
 
 #include <controller_interface/controller_base.h>
 #include <franka/robot_state.h>
@@ -105,9 +106,9 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   cartesian_damping_.setZero();
 
   // init SEDS 
-  //Prior.setZero();
-  //Mu.setZero();
-  //Sigma_flatten.setZero();
+  Prior.setZero();
+  Mu.setZero();
+  Sigma_flatten.setZero();
 
   return true;
 }
@@ -131,17 +132,7 @@ void CartesianImpedanceExampleController::starting(const ros::Time& /*time*/) {
 
   // set nullspace equilibrium configuration to initial q
   q_d_nullspace_ = q_initial;
-
-  // read Prior, Mu and Sigma
-  std::vector<double> Prior_ = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 6, 1);
-  std::vector<double> Mu_ = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 6);
-  std::vector<double> Sigma_ = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
-  
-  // Assuming Priors is a 6x1 vector, Mu is a 6x6 matrix, and flatSigma is a 36x3 matrix.
-  Eigen::Map<Eigen::Matrix<double, 6, 1>> Prior(Prior_.data());
-  Eigen::Map<Eigen::Matrix<double, 6, 6>> Mu(Mu_.data());
-  Eigen::Map<Eigen::Matrix<double, 36, 3>> Sigma(Sigma_.data());
-  
+      
 }
 
 void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
@@ -163,7 +154,29 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Vector3d position(transform.translation());
   Eigen::Quaterniond orientation(transform.rotation());
   Eigen::Matrix<double, 6, 1> velocity =jacobian * dq;
+
+  // Read Prior, Mu and Sigma
+  std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
+  std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
+  std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
+  Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
+  Eigen::Map<Eigen::Matrix<double, 6, 3>> Mu(mu.data());
+  Eigen::Map<Eigen::Matrix<double, 36, 3>> Sigma_flatten(sigma.data());
+
+  const int nbStates{3};
+  std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(3,3));
   
+  for (int i = 0; i < nbStates; ++i) {
+      Sigma[i] = Sigma_flatten.block<3, 3>(i * 3, 0); // Each block of 3 rows represents one 3x3 Sigma
+  }
+
+  Eigen::Matrix<double, 3, 1> diff;
+  Eigen::VectorXd Pxi(nbStates);
+  Eigen::VectorXd beta(nbStates);
+  Eigen::Vector3d velocity_d;
+  velocity_d.setZero();
+
+  // Start to record or to reproduce
   if(recording == false && reproduction == false){
     std::cout << "Please enter the demonstration number or type 99 to run reproduced trajectory:" << std::endl;
     std::cin >> demo_num;
@@ -171,6 +184,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     {
       std::cout << "Reproduction running" << std::endl;
       reproduction = true;
+
     }else{
       std::cout << "Your demos dumber is " << demo_num << std::endl;
       std::string filename = "/home/panda/YanQu/MA/Demo_data_2/follower_"+std::to_string(demo_num)+".txt";
@@ -183,6 +197,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       recording = true;
     }
   }
+
   // record the position and velocity
   if (follower_file.is_open() && recording == true){
     std::cout << "Recording position and velocities" <<std::endl;
@@ -191,8 +206,29 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   
   // reproduce the trajectory
   if (reproduction == true){
-    // SEDS
-    // generate position_d_
+    // SEDS to generate position_d_
+    for (int i = 0; i < nbStates; ++i) {
+      std::cout<< "i: "<< i<< std::endl;
+      int nbVar = position.size();
+      diff = position - Mu.col(i).head(3);
+      std::cout<< "diff: "<< diff[0]<< diff[1]<< diff[2]<< std::endl;
+      double prob = diff.transpose() * Sigma[i].inverse() * diff;
+      std::cout<< "prob: "<< prob<< std::endl;
+      prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].determinant() + std::numeric_limits<double>::min());
+      Pxi[i] = prob;
+    }
+    double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
+    beta = Pxi / sumPxi;
+
+    // std::cout<< "Pxi"<< Pxi<< std::endl;
+    std::cout<< "beta: "<< beta[0]<< beta[1]<< beta[2]<< std::endl;
+    // std::cout << "Prior" << std::endl;
+    // std::cout << Prior << std::endl;
+    // std::cout << "Mu" << std::endl;
+    // std::cout << Mu << std::endl;
+    // std::cout << "Sigma" << std::endl;
+    // std::cout << Sigma_flatten << std::endl;  
+    // std::cout<< "position_d: " << position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
   }
   
   // compute error to desired pose
@@ -268,21 +304,6 @@ Eigen::Matrix<double, 7, 1> CartesianImpedanceExampleController::saturateTorqueR
   return tau_d_saturated;
 }
 
-std::vector<double> readCsv(const std::string& filename, int numRows, int numCols) {
-    std::vector<double> matrix;
-    matrix.reserve(numRows * numCols);
-    std::ifstream file(filename);
-    double num;
-
-    while (file >> num) {
-        matrix.push_back(num);
-        // Skip the comma
-        file.ignore();
-    }
-
-    return matrix;
-}
-
 void CartesianImpedanceExampleController::complianceParamCallback(
     franka_example_controllers::compliance_paramConfig& config,
     uint32_t /*level*/) {
@@ -314,6 +335,29 @@ void CartesianImpedanceExampleController::equilibriumPoseCallback(
 }
 
 }  // namespace franka_example_controllers
+
+std::vector<double> readCsv(const std::string& filename, int numRows, int numCols) {
+    std::vector<double> matrix;
+    matrix.reserve(numRows * numCols);
+    std::ifstream file(filename);
+    double num;
+
+    while (file >> num) {
+        matrix.push_back(num);
+        // Skip the comma
+        file.ignore();
+    }
+
+    return matrix;
+}
+
+double gaussPDF(const Eigen::VectorXd &Data, const Eigen::VectorXd &Mu, const Eigen::MatrixXd &Sigma) {
+    int nbVar = Data.size();
+    Eigen::VectorXd diff = Data - Mu;
+    double prob = diff.transpose() * Sigma.inverse() * diff;
+    prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma.determinant());
+    return prob;
+}
 
 PLUGINLIB_EXPORT_CLASS(franka_example_controllers::CartesianImpedanceExampleController,
                        controller_interface::ControllerBase)
