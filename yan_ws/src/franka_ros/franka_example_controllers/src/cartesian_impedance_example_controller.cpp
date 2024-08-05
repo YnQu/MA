@@ -213,7 +213,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   if (reproduction == true){
     // SEDS to generate position_d_
     for (int i = 0; i < nbStates; ++i) {
-      std::cout<< "i: "<< i<< std::endl;
+      //std::cout<< "i: "<< i<< std::endl;
       int nbVar = position.size();
       //std::cout<< "position: "<< position[0]<< position[1]<< position[2]<< std::endl;
       diff = position - Mu.transpose().col(i).head(3);
@@ -223,15 +223,13 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       double prob = diff.transpose() * topLeft.inverse() * diff;
       //std::cout<< "Sigma: "<< topLeft<< std::endl;
       //std::cout<< "Sigma_inv: "<< topLeft.inverse()<< std::endl;
-      prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * topLeft.determinant() + std::numeric_limits<double>::min());
-      std::cout<< "prob: "<< prob<< std::endl;
+      prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
+      //std::cout<< "prob: "<< prob<< std::endl;
       Pxi[i] = prob;
     }
     double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
     beta = Pxi / sumPxi;
-
-    // std::cout<< "Pxi"<< Pxi<< std::endl;
-    std::cout<< "beta: "<< beta[0] << " " << beta[1]<< " "<< beta[2]<< " "<< std::endl;
+    //std::cout<< "beta: "<< beta[0] << " " << beta[1]<< " "<< beta[2]<< " "<< std::endl;
     // std::cout << "Prior" << std::endl;
     // std::cout << Prior << std::endl;
     // std::cout << "Mu" << std::endl;
@@ -239,6 +237,25 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     // std::cout << "Sigma" << std::endl;
     // std::cout << Sigma_flatten << std::endl;  
     // std::cout<< "position_d: " << position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
+  
+
+    for (int j = 0; j < nbStates; j++)
+    {
+      Eigen::VectorXd yj_tmp = Mu.transpose().col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
+                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position - Mu.transpose().col(j).head(3));
+      velocity_d += beta(j) * yj_tmp;
+    }
+
+    std::cout<< velocity_d << std::endl;
+
+    for (int d = 0; d < 3; d++)
+    {
+      position_d_[d] = position[d] + velocity_d[d] * 0.1;
+    }
+
+    std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
+    std::cout<< "position: "<< position[0]<<" "<< position[1]<<" "<< position[2]<< std::endl;
+    
   }
   
   // compute error to desired pose
