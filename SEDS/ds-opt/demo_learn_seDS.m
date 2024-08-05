@@ -45,7 +45,7 @@ close all; clear all; clc
 %pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
 pkg_dir         = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt';
 chosen_dataset  = 12; 
-sub_sample      = 3; % '>2' for real 3D Datasets, '1' for 2D toy datasets
+sub_sample      = 10; % '>2' for real 3D Datasets, '1' for 2D toy datasets
 nb_trajectories = 10; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
@@ -123,8 +123,8 @@ options.display       = 1;        % An option to control whether the algorithm
                                   % displays the output of each iterations [default: true]                            
 options.tol_stopping  = 10^-6;    % A small positive scalar defining the stoppping
                                   % tolerance for the optimization solver [default: 10^-10]
-options.max_iter      = 500;      % Maximum number of iteration forthe solver [default: i_max=1000]
-options.objective     = 'mse';    % 'mse'/'likelihood'
+options.max_iter      = 2000;      % Maximum number of iteration forthe solver [default: i_max=1000]
+options.objective     = 'likelihood';    % 'mse'/'likelihood'
 sub_sample            = 1;
 
 %running SEDS optimization solver
