@@ -3,7 +3,7 @@ nbStates = size(Sigma,3);
 in = 1:3;
 out = 4:6;
 
-x = [0.498345, 0.302689, 0.276107]';
+x = [0.5208830, 0.30461680, 0.296305]';
 
 Pxi = zeros(1, nbStates);
 beta = zeros(nbStates, 1);
@@ -12,6 +12,7 @@ Sigma_y = zeros(length(out), length(out));
 
 % Compute the Gaussian PDFs for each state for the input
 for i=1:nbStates
+  disp(i);
   Pxi(i) = gaussPDF(x, Mu(in,i), Sigma(in,in,i));
 end
 
@@ -26,9 +27,11 @@ end
 y
 
 function prob = gaussPDF(Data, Mu, Sigma)
+    Mu
+    Sigma
     % Assuming Data, Mu are column vectors and Sigma is a square matrix
     nbVar = numel(Data);
-    Data = Data - Mu;
+    Data = Data - Mu
     prob = (Data'/Sigma) * Data
     prob = exp(-0.5 * prob) / sqrt((2*pi)^nbVar * (abs(det(Sigma)) + realmin));
 end

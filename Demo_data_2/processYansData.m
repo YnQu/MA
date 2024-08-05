@@ -1,7 +1,7 @@
 close all; clear all; clc
 
 % Define the filenames
-nbSamples = 11;
+nbSamples = 9;
 filenames = cell(length(nbSamples),1);
 dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data_2/';
 for n = 1:nbSamples

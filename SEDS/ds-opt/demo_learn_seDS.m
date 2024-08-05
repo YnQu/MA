@@ -45,12 +45,12 @@ close all; clear all; clc
 %pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
 pkg_dir         = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt';
 chosen_dataset  = 12; 
-sub_sample      = 10; % '>2' for real 3D Datasets, '1' for 2D toy datasets
-nb_trajectories = 11; % Only for real 3D data
+sub_sample      = 3; % '>2' for real 3D Datasets, '1' for 2D toy datasets
+nb_trajectories = 9; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
-vel_samples = 10; vel_size = 0.5; 
+vel_samples = 3; vel_size = 0.5; 
 [h_data, h_att, h_vel] = plot_reference_trajectories_DS(Data, att, vel_samples, vel_size);
 limits = axis;
 

@@ -45,7 +45,6 @@ function [y, Sigma_y, beta] = GMR_SEDS(Priors, Mu, Sigma, x, in, out)
 %   volume="36",
 %   number="5"
 % }
-fprintf('size x: %d \n', size(x));
 nbData = size(x,2);
 nbData = 1;
 nbVar = size(Mu,1);
@@ -58,7 +57,6 @@ nbStates = size(Sigma,3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for i=1:nbStates
   Pxi(:,i) = Priors(i).*gaussPDF(x, Mu(in,i), Sigma(in,in,i));
-  fprintf('size Pxi: %d \n', size(Pxi));
 end
 beta = Pxi./repmat(sum(Pxi,2)+realmin,1,nbStates);
 
@@ -81,7 +79,6 @@ end
 beta_tmp = reshape(beta,[1 size(beta)]);
 y_tmp2 = repmat(beta_tmp,[length(out) 1 1]) .* y_tmp;
 y = sum(y_tmp2,3);
-fprintf('size y: %d \n', size(y));
 %% Compute expected covariance matrices Sigma_y, given input x
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 if nargout > 1
