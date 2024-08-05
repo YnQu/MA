@@ -12,23 +12,20 @@ Sigma_y = zeros(length(out), length(out));
 
 % Compute the Gaussian PDFs for each state for the input
 for i=1:nbStates
-  disp(i);
   Pxi(i) = gaussPDF(x, Mu(in,i), Sigma(in,in,i));
 end
 
 % Compute the responsibilities (beta)
-beta = Pxi / (sum(Pxi) + realmin)
+beta = Pxi / (sum(Pxi) + realmin);
 
 % Estimate the output (y)
 for j=1:nbStates
     yj_tmp = Mu(out,j) + Sigma(out,in,j) * inv(Sigma(in,in,j)) * (x - Mu(in,j));
-    y = y + beta(j) * yj_tmp;
+    y = y + beta(j) * yj_tmp
 end
-y
+
 
 function prob = gaussPDF(Data, Mu, Sigma)
-    Mu
-    Sigma
     % Assuming Data, Mu are column vectors and Sigma is a square matrix
     nbVar = numel(Data);
     Data = Data - Mu
