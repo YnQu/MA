@@ -218,9 +218,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       //std::cout<< "position: "<< position[0]<< position[1]<< position[2]<< std::endl;
       diff = position - Mu.transpose().col(i).head(3);
       
-      Eigen::MatrixXd topLeft = Sigma[i].block<3, 3>(0, 0);
-      //Eigen::MatrixXd bottomLeft = matrixSlices[i].block<3, 3>(3, 0);
-      double prob = diff.transpose() * topLeft.inverse() * diff;
+      double prob = diff.transpose() * Sigma[i].topLeftCorner(3,3).inverse() * diff;
       //std::cout<< "Sigma: "<< topLeft<< std::endl;
       //std::cout<< "Sigma_inv: "<< topLeft.inverse()<< std::endl;
       prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
@@ -250,7 +248,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
 
     for (int d = 0; d < 3; d++)
     {
-      position_d_[d] = position[d] + velocity_d[d] * 0.1;
+      position_d_[d] = position_d_[d] + velocity_d[d] * 0.001;
     }
 
     std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
