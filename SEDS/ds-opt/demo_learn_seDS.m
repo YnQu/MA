@@ -50,7 +50,7 @@ nb_trajectories = 10; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
-vel_samples = 1; vel_size = 0.5; 
+vel_samples = 10; vel_size = 0.5; 
 [h_data, h_att, h_vel] = plot_reference_trajectories_DS(Data, att, vel_samples, vel_size);
 limits = axis;
 
@@ -92,7 +92,7 @@ if do_ms_bic
     est_options.type        = 1;   % GMM Estimation Alorithm Type
     est_options.maxK        = 10;  % Maximum Gaussians for Type 1/2
     est_options.do_plots    = 1;   % Plot Estimation Statistics
-    est_options.fixed_K     = [];   % Fix K and estimate with EM
+    est_options.fixed_K     = [];  % Fix K and estimate with EM
     est_options.sub_sample  = 1;   % Size of sub-sampling of trajectories 
     
     [Priors0, Mu0, Sigma0] = fit_gmm([Xi_ref; Xi_dot_ref], [], est_options);
