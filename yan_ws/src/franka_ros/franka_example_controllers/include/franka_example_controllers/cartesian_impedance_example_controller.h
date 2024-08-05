@@ -61,7 +61,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
 
   // SEDS Parameters
   Eigen::Matrix<double, 3, 1> Prior;
-  Eigen::Matrix<double, 6, 3> Mu;
+  Eigen::Matrix<double, 3, 6> Mu;
   Eigen::Matrix<double, 36, 3> Sigma_flatten;
 
   // Dynamic reconfigure

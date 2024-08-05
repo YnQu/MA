@@ -159,15 +159,20 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
   std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
   std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
-  Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
-  Eigen::Map<Eigen::Matrix<double, 6, 3>> Mu(mu.data());
-  Eigen::Map<Eigen::Matrix<double, 36, 3>> Sigma_flatten(sigma.data());
-
   const int nbStates{3};
-  std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(3,3));
-  
-  for (int i = 0; i < nbStates; ++i) {
-      Sigma[i] = Sigma_flatten.block<3, 3>(i * 3, 0); // Each block of 3 rows represents one 3x3 Sigma
+  Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
+  Eigen::Map<Eigen::Matrix<double, 3, 6>> Mu(mu.data());
+  Eigen::Map<Eigen::Matrix<double, 3, 36>> Sigma_temp(sigma.data());
+  Eigen::Matrix<double,36,3> Sigma_flatten = Sigma_temp.transpose();
+
+  std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(6,6));
+
+  for (int i = 0; i < 3; ++i) {
+      for (int row = 0; row < 6; ++row) {
+          for (int col = 0; col < 6; ++col) {
+              Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
+          }
+      }
   }
 
   Eigen::Matrix<double, 3, 1> diff;
@@ -210,18 +215,23 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     for (int i = 0; i < nbStates; ++i) {
       std::cout<< "i: "<< i<< std::endl;
       int nbVar = position.size();
-      diff = position - Mu.col(i).head(3);
-      std::cout<< "diff: "<< diff[0]<< diff[1]<< diff[2]<< std::endl;
-      double prob = diff.transpose() * Sigma[i].inverse() * diff;
+      //std::cout<< "position: "<< position[0]<< position[1]<< position[2]<< std::endl;
+      diff = position - Mu.transpose().col(i).head(3);
+      
+      Eigen::MatrixXd topLeft = Sigma[i].block<3, 3>(0, 0);
+      //Eigen::MatrixXd bottomLeft = matrixSlices[i].block<3, 3>(3, 0);
+      double prob = diff.transpose() * topLeft.inverse() * diff;
+      //std::cout<< "Sigma: "<< topLeft<< std::endl;
+      //std::cout<< "Sigma_inv: "<< topLeft.inverse()<< std::endl;
+      prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * topLeft.determinant() + std::numeric_limits<double>::min());
       std::cout<< "prob: "<< prob<< std::endl;
-      prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].determinant() + std::numeric_limits<double>::min());
       Pxi[i] = prob;
     }
     double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
     beta = Pxi / sumPxi;
 
     // std::cout<< "Pxi"<< Pxi<< std::endl;
-    std::cout<< "beta: "<< beta[0]<< beta[1]<< beta[2]<< std::endl;
+    std::cout<< "beta: "<< beta[0] << " " << beta[1]<< " "<< beta[2]<< " "<< std::endl;
     // std::cout << "Prior" << std::endl;
     // std::cout << Prior << std::endl;
     // std::cout << "Mu" << std::endl;
