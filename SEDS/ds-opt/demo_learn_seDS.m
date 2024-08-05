@@ -124,7 +124,7 @@ options.display       = 1;        % An option to control whether the algorithm
 options.tol_stopping  = 10^-6;    % A small positive scalar defining the stoppping
                                   % tolerance for the optimization solver [default: 10^-10]
 options.max_iter      = 500;      % Maximum number of iteration forthe solver [default: i_max=1000]
-options.objective     = 'likelihood';    % 'mse'/'likelihood'
+options.objective     = 'mse';    % 'mse'/'likelihood'
 sub_sample            = 1;
 
 %running SEDS optimization solver
