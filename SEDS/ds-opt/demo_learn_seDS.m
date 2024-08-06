@@ -123,7 +123,7 @@ options.display       = 1;        % An option to control whether the algorithm
                                   % displays the output of each iterations [default: true]                            
 options.tol_stopping  = 10^-6;    % A small positive scalar defining the stoppping
                                   % tolerance for the optimization solver [default: 10^-10]
-options.max_iter      = 2000;      % Maximum number of iteration forthe solver [default: i_max=1000]
+options.max_iter      = 10000;      % Maximum number of iteration forthe solver [default: i_max=1000]
 options.objective     = 'likelihood';    % 'mse'/'likelihood'
 sub_sample            = 1;
 
@@ -139,6 +139,9 @@ csvwrite([export_path 'sigma.csv'], Sigma2D);
 
 ds_seds = @(x) GMR_SEDS(Priors,Mu,Sigma,x-repmat(att,[1 size(x,2)]),1:M,M+1:2*M);
 %[guess_mean, guess_cova] = GMR_SEDS(Priors,Mu,Sigma,x0_all-repmat(att,[1 size(x0_all,2)]),1:M,M+1:2*M);
+att
+x0_test = [0.5208830, 0.30461680, 0.296305]';
+vel_test = feval(ds_seds,x0_test)
 
 %% %%%%%%%%%%%%    Plot Resulting DS  %%%%%%%%%%%%%%%%%%%
 % Fill in plotting options
@@ -150,7 +153,7 @@ ds_plot_options.init_type = 'ellipsoid';  % For 3D DS, to initialize streamlines
 ds_plot_options.nb_points = 10;           % No of streamlines to plot (3D)
 ds_plot_options.plot_vol  = 1;            % Plot volume of initial points (3D)
 
-[hd, hs, hr, x_sim] = visualizeEstimatedDS(Data(1:M,:), ds_seds, ds_plot_options);
+[hd, hr, x_sim] = visualizeEstimatedDS(Data(1:M,:), ds_seds, ds_plot_options);
 limits = axis;
 switch options.objective
     case 'mse'        

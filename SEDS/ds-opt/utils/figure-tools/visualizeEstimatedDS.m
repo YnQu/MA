@@ -1,4 +1,4 @@
-function [hd, hs, hr, x_sim] = visualizeEstimatedDS(Xi_ref, ds_fun, ds_plot_options)
+function [hd, hr, x_sim] = visualizeEstimatedDS(Xi_ref, ds_fun, ds_plot_options)
 fig1 = figure('Color',[1 1 1]);
 M = size(Xi_ref,1);
 
@@ -57,7 +57,7 @@ if M == 2
         [hr] = scatter(x_sim(1,:),x_sim(2,:),10,[0 0 0],'filled'); hold on
     end
     
-elseif M == 3
+elseif M == 3 % 3D
     
     if plot_2D_only
         Xi_ref_2d = Xi_ref(dimensions,:);
@@ -89,11 +89,11 @@ elseif M == 3
         [hd] = plot3(Xi_ref(1,:),Xi_ref(2,:),Xi_ref(3,:),'r.','markersize',10); hold on;
        
         % Compute Start Locations for Streamlines
-        start_pnts =  sample_initial_points(x0_all, nb_pnts, init_type, plot_volume);
-        limits = axis;
+        %start_pnts =  sample_initial_points(x0_all, nb_pnts, init_type, plot_volume);
+        %limits = axis;
         
         % Plot Streamlines in blue
-        [hs] = plot_ds_model_3D(fig1, ds_fun, [0;0;0], limits, start_pnts, 'low'); hold on;
+        %[hs] = plot_ds_model_3D(fig1, ds_fun, [0;0;0], limits, start_pnts, 'low'); hold on;
         
         % Simulate trajectories and plot them on top
         if plot_repr

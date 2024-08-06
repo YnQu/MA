@@ -18,7 +18,7 @@ for i = 1:length(filenames)
 
     % Select the columns Xl_x, Xl_y, and Xl_z
     selectedData = T{:, {'Xl_x', 'Xl_y', 'Xl_z', 'Vl_x', 'Vl_y', 'Vl_z'}}';
-    %selectedData = selectedData(:,1500:end);
+    selectedData = selectedData(:,1000:end-1000);
 
     % Store the matrix in the cell array
     data{i} = selectedData;
