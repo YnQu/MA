@@ -140,6 +140,8 @@ csvwrite([export_path 'sigma.csv'], Sigma2D);
 ds_seds = @(x) GMR_SEDS(Priors,Mu,Sigma,x-repmat(att,[1 size(x,2)]),1:M,M+1:2*M);
 %[guess_mean, guess_cova] = GMR_SEDS(Priors,Mu,Sigma,x0_all-repmat(att,[1 size(x0_all,2)]),1:M,M+1:2*M);
 
+
+
 %% %%%%%%%%%%%%    Plot Resulting DS  %%%%%%%%%%%%%%%%%%%
 % Fill in plotting options
 ds_plot_options = [];

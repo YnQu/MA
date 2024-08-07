@@ -1,6 +1,6 @@
 %x = [0.5208830, 0.30461680, 0.296305]';
 %x = [0.3739, -0.4064, 0.3662]';
-x = [0.48469, -0.00309562, 0.380559]';
+x = [0.517098, -0.128176, 0.329092]';
 x_T = [0.3739, -0.4064, 0.3662]';
 tol = 0.001;
 
@@ -8,30 +8,30 @@ tol = 0.001;
 velocity = SEDS(x-x_T,Mu,Sigma)
 
 % while true
-for i=1:10000
-    fprintf("i is %i \n",i);
-    velocity = SEDS(x-x_T,Mu,Sigma);
-    fprintf("velocity is %d, %d, %d \n",velocity(1),velocity(2),velocity(3));
-
-    if (abs(velocity(1))<=0.001) && (abs(velocity(2))<=0.001) && (abs(velocity(3))<=0.001)
-        disp("tol here");
-        break;
-    end
-
-    for j=1:3
-        x(j) = x(j) + velocity(j) * 0.01;
-    end
-
-    if norm(x-x_T) <= 0.001
-        fprintf("position is %d, %d, %d \n",x(1),x(2),x(3));
-        disp("target found");
-        break;
-    end
-
-    fprintf("position is %d, %d, %d \n",x(1),x(2),x(3));
-    fprintf("-------------------------- \n");
-
-end
+% for i=1:10000
+%     fprintf("i is %i \n",i);
+%     velocity = SEDS(x-x_T,Mu,Sigma);
+%     fprintf("velocity is %d, %d, %d \n",velocity(1),velocity(2),velocity(3));
+% 
+%     if (abs(velocity(1))<=0.001) && (abs(velocity(2))<=0.001) && (abs(velocity(3))<=0.001)
+%         disp("tol here");
+%         %break;
+%     end
+% 
+%     for j=1:3
+%         x(j) = x(j) + velocity(j) * 0.001;
+%     end
+% 
+%     if norm(x-x_T) <= 0.001
+%         fprintf("position is %d, %d, %d \n",x(1),x(2),x(3));
+%         disp("target found");
+%         break;
+%     end
+% 
+%     fprintf("position is %d, %d, %d \n",x(1),x(2),x(3));
+%     fprintf("-------------------------- \n");
+% 
+% end
 
 function y = SEDS(x,Mu,Sigma)
     nbVar = size(Mu,1);
