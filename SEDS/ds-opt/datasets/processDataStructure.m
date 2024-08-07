@@ -21,8 +21,9 @@ for l=1:N
     
     % All starting position for reproduction accuracy comparison
     x0_all = [x0_all data_(1:M,1)];
+    
     % for single test
-    x0_all = [0.5208830, 0.30461680, 0.296305]';
+    % x0_all = [0.5208830, 0.30461680, 0.296305]';
     
     % Shift data to origin for Sina's approach + SEDS
     data_(1:M,:) = data_(1:M,:) - repmat(att, [1 length(data_)]);
