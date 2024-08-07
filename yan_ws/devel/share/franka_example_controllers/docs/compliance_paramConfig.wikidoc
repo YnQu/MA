@@ -4,9 +4,9 @@ group.0 {
 name=Dynamically Reconfigurable Parameters
 desc=See the [[dynamic_reconfigure]] package for details on dynamically reconfigurable parameters.
 0.name= ~translational_stiffness
-0.default= 200.0
+0.default= 100.0
 0.type= double
-0.desc=Cartesian translational stiffness Range: 0.0 to 400.0
+0.desc=Cartesian translational stiffness Range: 0.0 to 100.0
 1.name= ~rotational_stiffness
 1.default= 10.0
 1.type= double

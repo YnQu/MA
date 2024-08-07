@@ -109,6 +109,7 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   Prior.setZero();
   Mu.setZero();
   Sigma_flatten.setZero();
+  att.setZero();
 
   return true;
 }
@@ -160,6 +161,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
   std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
   const int nbStates{3};
+  const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
   Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
   Eigen::Map<Eigen::Matrix<double, 3, 6>> Mu(mu.data());
   Eigen::Map<Eigen::Matrix<double, 3, 36>> Sigma_temp(sigma.data());
@@ -212,45 +214,34 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // reproduce the trajectory
   if (reproduction == true){
     // SEDS to generate position_d_
+    position_temp = position_d_ - att;
+    std::cout<< "position_temp: "<< position_temp[0]   <<" "<< position_temp[1]   <<" "<< position_temp[2]<< std::endl;    
     for (int i = 0; i < nbStates; ++i) {
-      //std::cout<< "i: "<< i<< std::endl;
       int nbVar = position.size();
-      //std::cout<< "position: "<< position[0]<< position[1]<< position[2]<< std::endl;
-      diff = position - Mu.transpose().col(i).head(3);
-      
+
+      // Gauss PDF
+      diff = position_temp - Mu.transpose().col(i).head(3);
       double prob = diff.transpose() * Sigma[i].topLeftCorner(3,3).inverse() * diff;
-      //std::cout<< "Sigma: "<< topLeft<< std::endl;
-      //std::cout<< "Sigma_inv: "<< topLeft.inverse()<< std::endl;
       prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
-      //std::cout<< "prob: "<< prob<< std::endl;
       Pxi[i] = Prior[i]* prob;
     }
     double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
     beta = Pxi / sumPxi;
-    //std::cout<< "beta: "<< beta[0] << " " << beta[1]<< " "<< beta[2]<< " "<< std::endl;
-    // std::cout << "Prior" << std::endl;
-    // std::cout << Prior << std::endl;
-    // std::cout << "Mu" << std::endl;
-    // std::cout << Mu << std::endl;
-    // std::cout << "Sigma" << std::endl;
-    // std::cout << Sigma_flatten << std::endl;  
-    // std::cout<< "position_d: " << position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
-  
 
     for (int j = 0; j < nbStates; j++)
     {
       Eigen::VectorXd yj_tmp = Mu.transpose().col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
-                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position - Mu.transpose().col(j).head(3));
+                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position_temp - Mu.transpose().col(j).head(3));
       velocity_d = velocity_d + beta(j) * yj_tmp;
     }
 
-    for (int d = 0; d < 3; d++)
-    {
-      position_d_[d] = position[d] + velocity_d[d]*0.07;
-    }
-    std::cout<< "velocity_d: "<< velocity_d[0]<<" "<< velocity_d[1]<<" "<< velocity_d[2] << std::endl;
+    position_d_[0]= position_d_[0] + velocity_d[0] * 0.001;
+    position_d_[1]= position_d_[1] + velocity_d[1] * 0.001;
+    position_d_[2]= position_d_[2] + velocity_d[2] * 0.001;
+    
+    std::cout<< "velocity_d: "<< velocity_d[0] <<" "<< velocity_d[1] <<" "<< velocity_d[2] << std::endl;
     std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
-    std::cout<< "position: "<< position[0]<<" "<< position[1]<<" "<< position[2]<< std::endl;    
+    std::cout<< "position:   "<< position[0]   <<" "<< position[1]   <<" "<< position[2]<< std::endl;    
   }
   
   // compute error to desired pose
@@ -371,14 +362,6 @@ std::vector<double> readCsv(const std::string& filename, int numRows, int numCol
     }
 
     return matrix;
-}
-
-double gaussPDF(const Eigen::VectorXd &Data, const Eigen::VectorXd &Mu, const Eigen::MatrixXd &Sigma) {
-    int nbVar = Data.size();
-    Eigen::VectorXd diff = Data - Mu;
-    double prob = diff.transpose() * Sigma.inverse() * diff;
-    prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma.determinant());
-    return prob;
 }
 
 PLUGINLIB_EXPORT_CLASS(franka_example_controllers::CartesianImpedanceExampleController,
