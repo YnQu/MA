@@ -62,8 +62,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   // SEDS Parameters
   Eigen::Matrix<double, 3, 1> Prior;
   Eigen::Matrix<double, 3, 6> Mu;
-  Eigen::Matrix<double, 36, 3> Sigma_flatten;
-  Eigen::Vector3d position_temp;
+  //Eigen::Matrix<double, 36, 3> Sigma_flatten;
 
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
@@ -80,10 +79,12 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   std::ofstream follower_file;
   int demo_num{0};
   bool recording = false;
-  bool reproduction =false;
+  bool reproduction = false;
+  bool readSEDS = false;
 
   //SEDS
-  Eigen::Vector3d att;
+  //Eigen::Vector3d att;
+  double dt{0.001};
 
 };
 

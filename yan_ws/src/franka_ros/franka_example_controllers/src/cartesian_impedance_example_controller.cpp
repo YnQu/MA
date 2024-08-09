@@ -108,8 +108,8 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   // init SEDS 
   Prior.setZero();
   Mu.setZero();
-  Sigma_flatten.setZero();
-  att.setZero();
+  //Sigma_flatten.setZero();
+  //att.setZero();
 
   return true;
 }
@@ -156,33 +156,6 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Quaterniond orientation(transform.rotation());
   Eigen::Matrix<double, 6, 1> velocity = jacobian * dq;
 
-  // Read Prior, Mu and Sigma
-  std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
-  std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
-  std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
-  const int nbStates{3};
-  const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
-  Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
-  Eigen::Map<Eigen::Matrix<double, 3, 6>> Mu(mu.data());
-  Eigen::Map<Eigen::Matrix<double, 3, 36>> Sigma_temp(sigma.data());
-  Eigen::Matrix<double,36,3> Sigma_flatten = Sigma_temp.transpose();
-
-  std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(6,6));
-
-  for (int i = 0; i < 3; ++i) {
-      for (int row = 0; row < 6; ++row) {
-          for (int col = 0; col < 6; ++col) {
-              Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
-          }
-      }
-  }
-
-  Eigen::Matrix<double, 3, 1> diff;
-  Eigen::VectorXd Pxi(nbStates);
-  Eigen::VectorXd beta(nbStates);
-  Eigen::Vector3d velocity_d;
-  velocity_d.setZero();
-
   // Start to record or to reproduce
   if(recording == false && reproduction == false){
     std::cout << "Please enter the demonstration number or type 99 to run reproduced trajectory:" << std::endl;
@@ -213,14 +186,40 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   
   // reproduce the trajectory
   if (reproduction == true){
-    // SEDS to generate position_d_
-    position_temp = position_d_ - att;
-    std::cout<< "position_temp: "<< position_temp[0]   <<" "<< position_temp[1]   <<" "<< position_temp[2]<< std::endl;    
+    // Read Prior, Mu, Sigma and attractor 
+    std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
+    std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
+    std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
+    const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
+
+    const int nbStates{3};
+    Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
+    Eigen::Map<Eigen::Matrix<double, 3, 6>> Mu(mu.data());
+    Eigen::Map<Eigen::Matrix<double, 3, 36>> Sigma_temp(sigma.data());
+    Eigen::Matrix<double,36,3> Sigma_flatten = Sigma_temp.transpose();
+
+    std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(6,6));
+
+    for (int i = 0; i < 3; ++i) {
+        for (int row = 0; row < 6; ++row) {
+            for (int col = 0; col < 6; ++col) {
+                Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
+            }
+        }
+    }
+
+    Eigen::Matrix<double, 3, 1> diff;
+    Eigen::VectorXd Pxi(nbStates);
+    Eigen::VectorXd beta(nbStates);
+    Eigen::Vector3d velocity_d;
+    //velocity_d.setZero();
+
+    // std::cout<< "position_t: "<< position_temp[0]<<" "<< position_temp[1]<<" "<< position_temp[2]<< std::endl;
     for (int i = 0; i < nbStates; ++i) {
       int nbVar = position.size();
 
       // Gauss PDF
-      diff = position_temp - Mu.transpose().col(i).head(3);
+      diff = position - att - Mu.transpose().col(i).head(3);
       double prob = diff.transpose() * Sigma[i].topLeftCorner(3,3).inverse() * diff;
       prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
       Pxi[i] = Prior[i]* prob;
@@ -231,13 +230,13 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     for (int j = 0; j < nbStates; j++)
     {
       Eigen::VectorXd yj_tmp = Mu.transpose().col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
-                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position_temp - Mu.transpose().col(j).head(3));
+                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position - att - Mu.transpose().col(j).head(3));
       velocity_d = velocity_d + beta(j) * yj_tmp;
     }
-
-    position_d_[0]= position_d_[0] + velocity_d[0] * 0.001;
-    position_d_[1]= position_d_[1] + velocity_d[1] * 0.001;
-    position_d_[2]= position_d_[2] + velocity_d[2] * 0.001;
+    dt = 0.1;
+    position_d_[0]= position[0] + velocity_d[0] * dt;
+    position_d_[1]= position[1] + velocity_d[1] * dt;
+    position_d_[2]= position[2] + velocity_d[2] * dt;
     
     std::cout<< "velocity_d: "<< velocity_d[0] <<" "<< velocity_d[1] <<" "<< velocity_d[2] << std::endl;
     std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
@@ -268,10 +267,11 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::MatrixXd jacobian_transpose_pinv;
   pseudoInverse(jacobian.transpose(), jacobian_transpose_pinv);
 
-  // Cartesian PD control with damping ratio = 1
-  cartesian_stiffness_.topLeftCorner(3, 3) << 400.0 * Eigen::MatrixXd::Identity(3, 3);
+  cartesian_stiffness_.topLeftCorner(3, 3) << 800.0 * Eigen::MatrixXd::Identity(3, 3);
   cartesian_stiffness_.bottomRightCorner(3, 3) << 20.0 * Eigen::MatrixXd::Identity(3, 3);
-  
+  cartesian_damping_.topLeftCorner(3, 3) << 2.0 * sqrt(800) * Eigen::Matrix3d::Identity();
+
+ // Cartesian PD control with damping ratio = 1  
   tau_task << jacobian.transpose() *
                   (-cartesian_stiffness_ * error - cartesian_damping_ * (jacobian * dq));
   // nullspace PD control with damping ratio = 1

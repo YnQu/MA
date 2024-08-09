@@ -138,6 +138,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/home/panda/YanQu/MA/yan_ws/build/franka_ros/franka_hw/cmake_install.cmake")
   include("/home/panda/YanQu/MA/yan_ws/build/franka_ros/franka_control/cmake_install.cmake")
   include("/home/panda/YanQu/MA/yan_ws/build/franka_ros/franka_example_controllers/cmake_install.cmake")
+  include("/home/panda/YanQu/MA/yan_ws/build/franka_ros/franka_gazebo/cmake_install.cmake")
 
 endif()
 
