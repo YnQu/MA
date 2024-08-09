@@ -85,6 +85,7 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   //SEDS
   //Eigen::Vector3d att;
   double dt{0.001};
+  const int nbStates{4};
 
 };
 

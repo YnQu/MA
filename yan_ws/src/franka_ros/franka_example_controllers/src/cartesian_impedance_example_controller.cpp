@@ -187,34 +187,35 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // reproduce the trajectory
   if (reproduction == true){
     // Read Prior, Mu, Sigma and attractor 
-    std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", 3, 1);
-    std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, 3);
-    std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, 3);
-    const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
+    std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", nbStates, 1);
+    std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, nbStates);
+    std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, nbStates);
+    //const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
+    const Eigen::Vector3d att = {0.5461, -0.0545, 0.0596};
 
-    const int nbStates{3};
-    Eigen::Map<Eigen::Matrix<double, 3, 1>> Prior(prior.data());
-    Eigen::Map<Eigen::Matrix<double, 3, 6>> Mu(mu.data());
-    Eigen::Map<Eigen::Matrix<double, 3, 36>> Sigma_temp(sigma.data());
-    Eigen::Matrix<double,36,3> Sigma_flatten = Sigma_temp.transpose();
+    Eigen::Map<Eigen::Matrix<double, 4, 1>> Prior(prior.data());
+    Eigen::Map<Eigen::Matrix<double, 4, 6>> Mu(mu.data());
+    Eigen::Map<Eigen::Matrix<double, 4, 36>> Sigma_temp(sigma.data());
+    Eigen::Matrix<double,36,4> Sigma_flatten = Sigma_temp.transpose();
 
-    std::vector<Eigen::MatrixXd> Sigma(nbStates,Eigen::MatrixXd(6,6));
+    std::vector<Eigen::MatrixXd> Sigma(4,Eigen::MatrixXd(6,6));
 
-    for (int i = 0; i < 3; ++i) {
+    for (int i = 0; i < nbStates; ++i) {
         for (int row = 0; row < 6; ++row) {
             for (int col = 0; col < 6; ++col) {
                 Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
             }
         }
     }
-
+    // std::cout<<"Prior: "<< Prior<<std::endl;
+    // std::cout<<"Mu:    "<< Mu<<std::endl;
+    // std::cout<<"Sigma: "<< Sigma[0]<<std::endl;
     Eigen::Matrix<double, 3, 1> diff;
     Eigen::VectorXd Pxi(nbStates);
     Eigen::VectorXd beta(nbStates);
     Eigen::Vector3d velocity_d;
     //velocity_d.setZero();
 
-    // std::cout<< "position_t: "<< position_temp[0]<<" "<< position_temp[1]<<" "<< position_temp[2]<< std::endl;
     for (int i = 0; i < nbStates; ++i) {
       int nbVar = position.size();
 
@@ -233,7 +234,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
                                   Sigma[j].topLeftCorner(3, 3).inverse() * (position - att - Mu.transpose().col(j).head(3));
       velocity_d = velocity_d + beta(j) * yj_tmp;
     }
-    dt = 0.1;
+    dt = 0.001;
     position_d_[0]= position[0] + velocity_d[0] * dt;
     position_d_[1]= position[1] + velocity_d[1] * dt;
     position_d_[2]= position[2] + velocity_d[2] * dt;
