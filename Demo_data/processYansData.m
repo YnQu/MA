@@ -18,15 +18,14 @@ for i = 1:length(filenames)
 
     % Select the columns Xl_x, Xl_y, and Xl_z
     selectedData = T{:, {'Xl_x', 'Xl_y', 'Xl_z', 'Vl_x', 'Vl_y', 'Vl_z'}}';
-    selectedData = selectedData(:,2000:end-1000);
+    selectedData = selectedData(:,500:end-500);
 
     % Store the matrix in the cell array
     data{i} = selectedData;
 end
 
 % Define the path to save the .mat file
-savePath = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt/datasets/3D_Yan_test.mat';
-
+savePath = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
 % Save the data cell array to the specified path
 save(savePath, 'data');
 

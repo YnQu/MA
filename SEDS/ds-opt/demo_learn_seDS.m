@@ -46,7 +46,7 @@ close all; clear all; clc
 pkg_dir         = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt';
 chosen_dataset  = 12; 
 sub_sample      = 2; % '>2' for real 3D Datasets, '1' for 2D toy datasets
-nb_trajectories = 10; % Only for real 3D data
+nb_trajectories = 9; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
