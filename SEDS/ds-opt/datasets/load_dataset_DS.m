@@ -31,6 +31,8 @@ switch dataset
         dataset_name = '3D-pick-box.mat';  
     case 12
         dataset_name = '3D_Yan_test.mat';
+    case 13
+        dataset_name = 'Yan_demo.mat';
 end
 
 if isempty(sub_sample)
@@ -61,7 +63,8 @@ elseif dataset <= 5
     
 % Processing for the 3D Datasets
 else
-    data_ = load(strcat(pkg_dir,'/datasets/',dataset_name));% strcat() returns the path to dataset
+    %data_ = load(strcat(pkg_dir,'/datasets/',dataset_name));% strcat() returns the path to dataset
+    data_ = load(strcat(pkg_dir,'/datasets/',dataset_name));
     % dt = data_.dt;
     data_ = data_.data;
     N = length(data_); % N is the #traj - 1

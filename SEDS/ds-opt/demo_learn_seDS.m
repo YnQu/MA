@@ -43,10 +43,10 @@
 close all; clear all; clc
 %pkg_dir         = '/home/nbfigueroa/Dropbox/PhD_papers/CoRL-2018/code/ds-opt/';
 %pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
-pkg_dir         = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt';
-chosen_dataset  = 12; 
+pkg_dir         = '/home/yan/MA/Peeling_like';
+chosen_dataset  = 13; 
 sub_sample      = 2; % '>2' for real 3D Datasets, '1' for 2D toy datasets
-nb_trajectories = 9; % Only for real 3D data
+nb_trajectories = 5; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
@@ -131,7 +131,8 @@ sub_sample            = 1;
 [Priors, Mu, Sigma]= SEDS_Solver(Priors0,Mu0,Sigma0,[Xi_ref(:,1:sub_sample:end); Xi_dot_ref(:,1:sub_sample:end)],options);
 
 %% %%%%%%%%%%%    Export Prior, Mu and Sigama  %%%%%%%%%%
-export_path = '/Users/yanqu/Desktop/Thesis/MA/Learn_data/';
+% export_path = '/Users/yanqu/Desktop/Thesis/MA/DS_para/'; % Mac 
+export_path = '/home/yan/MA/Peeling_like/State_1/DS_para/';
 csvwrite([export_path 'priors.csv'], Priors);
 csvwrite([export_path 'mu.csv'], Mu);
 Sigma2D = reshape(Sigma, [], size(Sigma, 3));
