@@ -168,7 +168,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
     }else{
       std::cout << "Your demos dumber is " << demo_num << std::endl;
       //std::string filename = "/home/panda/YanQu/MA/Demo_data_2/follower_"+std::to_string(demo_num)+".txt";
-      std::string filename = "/home/panda/YanQu/MA/Peeling_like/State_1/follower_"+std::to_string(demo_num)+".txt";
+      std::string filename = "/home/panda/YanQu/MA/Peeling_like/State_3/follower_"+std::to_string(demo_num)+".txt";
 
       follower_file.open(filename);
       if (!follower_file){
