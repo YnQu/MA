@@ -30,9 +30,13 @@ switch dataset
     case 10
         dataset_name = '3D-pick-box.mat';  
     case 12
-        dataset_name = '3D_Yan_test.mat';
+        dataset_name = 'State_1.mat';
     case 13
-        dataset_name = 'Yan_demo.mat';
+        dataset_name = 'State_2.mat';
+    case 14
+        dataset_name = 'State_3.mat';
+    case 15
+        dataset_name = '3D_Yan_test.mat';
 end
 
 if isempty(sub_sample)

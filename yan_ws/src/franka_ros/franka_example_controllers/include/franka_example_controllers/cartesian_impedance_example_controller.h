@@ -59,11 +59,6 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
   Eigen::Vector3d position_d_target_;
   Eigen::Quaterniond orientation_d_target_;
 
-  // SEDS Parameters
-  Eigen::Matrix<double, 3, 1> Prior;
-  Eigen::Matrix<double, 3, 6> Mu;
-  //Eigen::Matrix<double, 36, 3> Sigma_flatten;
-
   // Dynamic reconfigure
   std::unique_ptr<dynamic_reconfigure::Server<franka_example_controllers::compliance_paramConfig>>
       dynamic_server_compliance_param_;
@@ -77,15 +72,34 @@ class CartesianImpedanceExampleController : public controller_interface::MultiIn
 
   // Data recording
   std::ofstream follower_file;
+  std::ofstream test_file_1;
+  std::ofstream test_file_2;
+  std::ofstream test_file_3;
   int demo_num{0};
   bool recording = false;
   bool reproduction = false;
   bool readSEDS = false;
 
   //SEDS
-  //Eigen::Vector3d att;
+//   Eigen::MatrixXd Prior;
+  Eigen::MatrixXd Mu;
+//   Eigen::MatrixXd Sigma_temp;
+  Eigen::MatrixXd Sigma_flatten;
+//   std::vector<Eigen::MatrixXd> Sigma;
+
+  std::vector<double> att_test;
+  Eigen::Vector3d Att;
+  std::vector<double> prior;
+  std::vector<double> mu;
+  std::vector<double> sigma;
+  std::vector<double> att;
   double dt{0.001};
-  const int nbStates{4};
+  double tol{0.02};
+  int State{1};
+  int nbGMM{3};
+  double dis_to_att{0.0};
+  Eigen::Vector3d velocity_d;
+  Eigen::Matrix<double, 6, 1> velocity_desired;
 
 };
 

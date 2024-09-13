@@ -3,7 +3,8 @@ close all; clear all; clc
 % Define the filenames
 nbSamples = 10;
 filenames = cell(length(nbSamples),1);
-dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data_2/';
+%dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data_2/';
+dataset_path = '/home/yan/MA/Demo_data_2/';
 for n = 1:nbSamples
     filenames{n} = [dataset_path 'follower_' num2str(n) '.txt'];
 end
@@ -25,7 +26,8 @@ for i = 1:length(filenames)
 end
 
 % Define the path to save the .mat file
-savePath = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
+%savePath = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
+savePath = '/home/yan/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
 
 % Save the data cell array to the specified path
 save(savePath, 'data');

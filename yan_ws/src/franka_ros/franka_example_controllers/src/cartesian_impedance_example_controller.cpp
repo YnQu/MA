@@ -106,8 +106,8 @@ bool CartesianImpedanceExampleController::init(hardware_interface::RobotHW* robo
   cartesian_damping_.setZero();
 
   // init SEDS 
-  Prior.setZero();
-  Mu.setZero();
+  //Prior.setZero();
+  //Mu.setZero();
   //Sigma_flatten.setZero();
   //att.setZero();
 
@@ -156,7 +156,7 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::Quaterniond orientation(transform.rotation());
   Eigen::Matrix<double, 6, 1> velocity = jacobian * dq;
 
-  // Start to record or to reproduce
+  // Prepare to record or to reproduce
   if(recording == false && reproduction == false){
     std::cout << "Please enter the demonstration number or type 99 to run reproduced trajectory:" << std::endl;
     std::cin >> demo_num;
@@ -165,10 +165,26 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
       std::cout << "Reproduction running" << std::endl;
       reproduction = true;
 
+      std::string filename_1 = "/home/yan/MA/Peeling_like/datasets/"+std::string("Test_1")+".txt";
+      std::string filename_2 = "/home/yan/MA/Peeling_like/datasets/"+std::string("Test_2")+".txt";
+      std::string filename_3 = "/home/yan/MA/Peeling_like/datasets/"+std::string("Test_3")+".txt";
+
+      test_file_1.open(filename_1);
+      test_file_2.open(filename_2);
+      test_file_3.open(filename_3);
+      if (!test_file_1 || !test_file_2 || !test_file_3){
+        ROS_ERROR("Failed to write the data");
+        //return false;
+      }
+      test_file_1 << "Xl_x\tXl_y\tXl_z\tVl_x\tVl_y\tVl_z\n";
+      test_file_2 << "Xl_x\tXl_y\tXl_z\tVl_x\tVl_y\tVl_z\n";
+      test_file_3 << "Xl_x\tXl_y\tXl_z\tVl_x\tVl_y\tVl_z\n";
+
     }else{
       std::cout << "Your demos dumber is " << demo_num << std::endl;
       //std::string filename = "/home/panda/YanQu/MA/Demo_data_2/follower_"+std::to_string(demo_num)+".txt";
-      std::string filename = "/home/panda/YanQu/MA/Peeling_like/State_3/follower_"+std::to_string(demo_num)+".txt";
+      //std::string filename = "/home/panda/YanQu/MA/Peeling_like/State_3/follower_"+std::to_string(demo_num)+".txt";
+      std::string filename = "/home/yan/MA/Peeling_like/State_3/follower_"+std::to_string(demo_num)+".txt";
 
       follower_file.open(filename);
       if (!follower_file){
@@ -189,62 +205,115 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   // reproduce the trajectory
   if (reproduction == true){
     // Read Prior, Mu, Sigma and attractor 
-    std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", nbStates, 1);
-    std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, nbStates);
-    std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, nbStates);
-    //const Eigen::Vector3d att = {0.3739, -0.4064, 0.3662};
-    const Eigen::Vector3d att = {0.5461, -0.0545, 0.0596};
+    // std::vector<double> prior = readCsv("/home/panda/YanQu/MA/Learn_data/priors.csv", nbGMM, 1);
+    // std::vector<double> mu = readCsv("/home/panda/YanQu/MA/Learn_data/mu.csv", 6, nbGMM);
+    // std::vector<double> sigma = readCsv("/home/panda/YanQu/MA/Learn_data/sigma.csv", 36, nbGMM);
 
-    Eigen::Map<Eigen::Matrix<double, 4, 1>> Prior(prior.data());
-    Eigen::Map<Eigen::Matrix<double, 4, 6>> Mu(mu.data());
-    Eigen::Map<Eigen::Matrix<double, 4, 36>> Sigma_temp(sigma.data());
-    Eigen::Matrix<double,36,4> Sigma_flatten = Sigma_temp.transpose();
+    if(State == 1){
+      nbGMM = readCsv("/home/yan/MA/Peeling_like/State_1/DS_para/nbGMM.csv", 1, 1)[0];
+      prior = readCsv("/home/yan/MA/Peeling_like/State_1/DS_para/priors.csv", nbGMM, 1);
+      mu    = readCsv("/home/yan/MA/Peeling_like/State_1/DS_para/mu.csv", 6, nbGMM);
+      sigma = readCsv("/home/yan/MA/Peeling_like/State_1/DS_para/sigma.csv", 36, nbGMM);
+      att   = readCsv("/home/yan/MA/Peeling_like/State_1/DS_para/att.csv", 3, 1); 
+      test_file_1 << position[0] << "\t" << position[1] << "\t" << position[2] << "\t" << velocity_d[0] << "\t" << velocity_d[1]<< "\t" << velocity_d[2]<<"\n";
+    }
+    if (State == 2)
+    {
+      nbGMM = readCsv("/home/yan/MA/Peeling_like/State_2/DS_para/nbGMM.csv", 1, 1)[0];
+      prior = readCsv("/home/yan/MA/Peeling_like/State_2/DS_para/priors.csv", nbGMM, 1);
+      mu    = readCsv("/home/yan/MA/Peeling_like/State_2/DS_para/mu.csv", 6, nbGMM);
+      sigma = readCsv("/home/yan/MA/Peeling_like/State_2/DS_para/sigma.csv", 36, nbGMM);
+      att   = readCsv("/home/yan/MA/Peeling_like/State_2/DS_para/att.csv", 3, 1);
+      test_file_2 << position[0] << "\t" << position[1] << "\t" << position[2] << "\t" << velocity_d[0] << "\t" << velocity_d[1]<< "\t" << velocity_d[2]<<"\n";
+    }
+    if (State == 3)
+    {
+      nbGMM = readCsv("/home/yan/MA/Peeling_like/State_3/DS_para/nbGMM.csv", 1, 1)[0];
+      prior = readCsv("/home/yan/MA/Peeling_like/State_3/DS_para/priors.csv", nbGMM, 1);
+      mu    = readCsv("/home/yan/MA/Peeling_like/State_3/DS_para/mu.csv", 6, nbGMM);
+      sigma = readCsv("/home/yan/MA/Peeling_like/State_3/DS_para/sigma.csv", 36, nbGMM);
+      att   = readCsv("/home/yan/MA/Peeling_like/State_3/DS_para/att.csv", 3, 1);
+      test_file_3 << position[0] << "\t" << position[1] << "\t" << position[2] << "\t" << velocity_d[0] << "\t" << velocity_d[1]<< "\t" << velocity_d[2]<<"\n";
+    }      
 
-    std::vector<Eigen::MatrixXd> Sigma(4,Eigen::MatrixXd(6,6));
-
-    for (int i = 0; i < nbStates; ++i) {
+        
+    Eigen::Map<Eigen::MatrixXd> Prior(prior.data(), nbGMM, 1);
+    Eigen::Map<Eigen::MatrixXd> Mu_temp(mu.data(), nbGMM, 6);
+    Eigen::Map<Eigen::MatrixXd> Sigma_temp(sigma.data(), nbGMM, 36);
+    Eigen::Map<Eigen::Vector3d> Att(att.data());
+    Sigma_flatten = Sigma_temp.transpose(); 
+    Mu = Mu_temp.transpose();
+    
+    std::vector<Eigen::MatrixXd> Sigma(nbGMM,Eigen::MatrixXd(6,6));  
+    for (int i = 0; i < nbGMM; ++i) {
         for (int row = 0; row < 6; ++row) {
             for (int col = 0; col < 6; ++col) {
-                Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
+              Sigma[i](row, col) = Sigma_flatten(row * 6 + col, i);
             }
         }
     }
     // std::cout<<"Prior: "<< Prior<<std::endl;
     // std::cout<<"Mu:    "<< Mu<<std::endl;
     // std::cout<<"Sigma: "<< Sigma[0]<<std::endl;
-    Eigen::Matrix<double, 3, 1> diff;
-    Eigen::VectorXd Pxi(nbStates);
-    Eigen::VectorXd beta(nbStates);
-    Eigen::Vector3d velocity_d;
-    //velocity_d.setZero();
 
-    for (int i = 0; i < nbStates; ++i) {
+    //////////////// Only For Test //////////////////
+    // std::vector<double> prior = readCsv("/home/yan/MA//DS_para/priors.csv", nbGMM, 1);
+    // std::vector<double> mu = readCsv("/home/yan/MA/DS_para/mu.csv", 6, nbGMM);
+    // std::vector<double> sigma = readCsv("/home/yan/MA/DS_para/sigma.csv", 36, nbGMM);
+    // const Eigen::Vector3d att = {0.3739, -0.4064, 0.3660};
+  
+    //////////////////// SEDS //////////////////////////
+    Eigen::Matrix<double, 3, 1> diff;
+    Eigen::VectorXd Pxi(nbGMM);
+    Eigen::VectorXd beta(nbGMM);
+    velocity_desired.setZero();
+    velocity_d.setZero();
+
+    for (int i = 0; i < nbGMM; ++i) {
       int nbVar = position.size();
 
       // Gauss PDF
-      diff = position - att - Mu.transpose().col(i).head(3);
+      diff = position - Att - Mu.col(i).head(3);
       double prob = diff.transpose() * Sigma[i].topLeftCorner(3,3).inverse() * diff;
       prob = exp(-0.5 * prob) / sqrt(pow(2 * M_PI, nbVar) * Sigma[i].topLeftCorner(3,3).determinant() + std::numeric_limits<double>::min());
-      Pxi[i] = Prior[i]* prob;
+      Pxi[i] = Prior(i)* prob;
     }
     double sumPxi = Pxi.sum() + std::numeric_limits<double>::min();
     beta = Pxi / sumPxi;
 
-    for (int j = 0; j < nbStates; j++)
+    for (int j = 0; j < nbGMM; j++)
     {
-      Eigen::VectorXd yj_tmp = Mu.transpose().col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
-                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position - att - Mu.transpose().col(j).head(3));
+      Eigen::VectorXd yj_tmp = Mu.col(j).tail(3) + Sigma[j].bottomLeftCorner(3, 3) *
+                                  Sigma[j].topLeftCorner(3, 3).inverse() * (position - Att - Mu.col(j).head(3));
       velocity_d = velocity_d + beta(j) * yj_tmp;
+      velocity_desired[0]= velocity_d[0];
+      velocity_desired[1]= velocity_d[1];
+      velocity_desired[2]= velocity_d[2];
     }
-    dt = 0.001;
+
     position_d_[0]= position[0] + velocity_d[0] * dt;
     position_d_[1]= position[1] + velocity_d[1] * dt;
     position_d_[2]= position[2] + velocity_d[2] * dt;
     
+    // std::cout<< "nbGMM:      "<< nbGMM << std::endl;
+    // std::cout<< "Att:        "<< Att[0] <<" "<< Att[1] <<" "<< Att[2] << std::endl;
+    std::cout<< "State:      "<< State << std::endl;
     std::cout<< "velocity_d: "<< velocity_d[0] <<" "<< velocity_d[1] <<" "<< velocity_d[2] << std::endl;
     std::cout<< "position_d: "<< position_d_[0]<<" "<< position_d_[1]<<" "<< position_d_[2]<< std::endl;
     std::cout<< "position:   "<< position[0]   <<" "<< position[1]   <<" "<< position[2]<< std::endl;    
-  }
+    std::cout<< "dis_to_att: "<< dis_to_att << std::endl;
+    dis_to_att = sqrt(pow(position[0] - Att[0], 2) + pow(position[1] - Att[1], 2) + pow(position[2] - Att[2], 2));
+   
+    }
+    if (dis_to_att < tol)
+    {
+      State = State + 1;
+      
+      if (State > 3)
+      {
+        State = 1;
+      }
+    }
   
   // compute error to desired pose
   // position error
@@ -270,13 +339,13 @@ void CartesianImpedanceExampleController::update(const ros::Time& /*time*/,
   Eigen::MatrixXd jacobian_transpose_pinv;
   pseudoInverse(jacobian.transpose(), jacobian_transpose_pinv);
 
-  cartesian_stiffness_.topLeftCorner(3, 3) << 800.0 * Eigen::MatrixXd::Identity(3, 3);
+  cartesian_stiffness_.topLeftCorner(3, 3) << 3000.0 * Eigen::MatrixXd::Identity(3, 3);
   cartesian_stiffness_.bottomRightCorner(3, 3) << 20.0 * Eigen::MatrixXd::Identity(3, 3);
-  cartesian_damping_.topLeftCorner(3, 3) << 2.0 * sqrt(800) * Eigen::Matrix3d::Identity();
+  cartesian_damping_.topLeftCorner(3, 3) << 2.0 * sqrt(3000) * Eigen::Matrix3d::Identity();
 
  // Cartesian PD control with damping ratio = 1  
   tau_task << jacobian.transpose() *
-                  (-cartesian_stiffness_ * error - cartesian_damping_ * (jacobian * dq));
+                  (-cartesian_stiffness_ * error - cartesian_damping_ * ((jacobian * dq)-velocity_desired));
   // nullspace PD control with damping ratio = 1
   tau_nullspace << (Eigen::MatrixXd::Identity(7, 7) -
                     jacobian.transpose() * jacobian_transpose_pinv) *

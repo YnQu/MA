@@ -1,4 +1,4 @@
-prefix=/home/panda/YanQu/MA/yan_ws/devel
+prefix=/home/yan/MA/yan_ws/devel
 
 Name: franka_description
 Description: Description of franka_description

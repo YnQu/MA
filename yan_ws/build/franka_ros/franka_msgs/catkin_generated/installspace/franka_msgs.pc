@@ -1,4 +1,4 @@
-prefix=/home/panda/YanQu/MA/yan_ws/install
+prefix=/home/yan/MA/yan_ws/install
 
 Name: franka_msgs
 Description: Description of franka_msgs

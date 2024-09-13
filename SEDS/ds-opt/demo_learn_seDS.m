@@ -38,19 +38,21 @@
 % 9:  CShape top            (3D) -- 16 trajectories recorded at 100Hz
 % 10: CShape all            (3D) -- 20 trajectories recorded at 100Hz
 % 11: Bumpy Surface         (3D) -- x trajectories recorded at 100Hz
-% 12: Yan's Test Dataset    (3D) -- 3 trajectories recoreded at 1000Hz
+% 12-14: State 1-3
+% 15: Yan's Test Dataset    (3D) -- 3 trajectories recoreded at 1000Hz
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 close all; clear all; clc
 %pkg_dir         = '/home/nbfigueroa/Dropbox/PhD_papers/CoRL-2018/code/ds-opt/';
 %pkg_dir         = '/Users/yanqu/Desktop/Thesis/Code_before_lab/icra19-lfd-tutorial-exercises/exercise1_learning/ds-opt';
 pkg_dir         = '/home/yan/MA/Peeling_like';
-chosen_dataset  = 13; 
+%pkg_dir          = '/home/yan/MA/SEDS/ds-opt/';
+chosen_dataset  = 14; 
 sub_sample      = 2; % '>2' for real 3D Datasets, '1' for 2D toy datasets
 nb_trajectories = 5; % Only for real 3D data
 [Data, Data_sh, att, x0_all, data, dt] = load_dataset_DS(pkg_dir, chosen_dataset, sub_sample, nb_trajectories);
 
 % Position/Velocity Trajectories
-vel_samples = 10; vel_size = 0.5; 
+vel_samples = 2; vel_size = 0.5; 
 [h_data, h_att, h_vel] = plot_reference_trajectories_DS(Data, att, vel_samples, vel_size);
 limits = axis;
 
@@ -123,7 +125,7 @@ options.display       = 1;        % An option to control whether the algorithm
                                   % displays the output of each iterations [default: true]                            
 options.tol_stopping  = 10^-6;    % A small positive scalar defining the stoppping
                                   % tolerance for the optimization solver [default: 10^-10]
-options.max_iter      = 10000;      % Maximum number of iteration forthe solver [default: i_max=1000]
+options.max_iter      = 1000;      % Maximum number of iteration forthe solver [default: i_max=1000]
 options.objective     = 'likelihood';    % 'mse'/'likelihood'
 sub_sample            = 1;
 
@@ -131,8 +133,11 @@ sub_sample            = 1;
 [Priors, Mu, Sigma]= SEDS_Solver(Priors0,Mu0,Sigma0,[Xi_ref(:,1:sub_sample:end); Xi_dot_ref(:,1:sub_sample:end)],options);
 
 %% %%%%%%%%%%%    Export Prior, Mu and Sigama  %%%%%%%%%%
-% export_path = '/Users/yanqu/Desktop/Thesis/MA/DS_para/'; % Mac 
-export_path = '/home/yan/MA/Peeling_like/State_1/DS_para/';
+%export_path = '/Users/yanqu/Desktop/Thesis/MA/DS_para/'; % Mac 
+export_path = '/home/yan/MA/Peeling_like/State_3/DS_para/';
+%export_path = '/home/yan/MA/DS_para/';
+csvwrite([export_path 'nbGMM.csv'], nb_gaussians);
+csvwrite([export_path 'att.csv'],att);
 csvwrite([export_path 'priors.csv'], Priors);
 csvwrite([export_path 'mu.csv'], Mu);
 Sigma2D = reshape(Sigma, [], size(Sigma, 3));

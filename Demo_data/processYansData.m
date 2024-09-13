@@ -3,7 +3,8 @@ close all; clear all; clc
 % Define the filenames
 nbSamples = 9;
 filenames = cell(length(nbSamples),1);
-dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data/';
+%dataset_path = '/Users/yanqu/Desktop/Thesis/MA/Demo_data/';
+dataset_path = '/home/yan/MA/Demo_data/';
 for n = 1:nbSamples
     filenames{n} = [dataset_path 'follower_' num2str(n) '.txt'];
 end
@@ -18,14 +19,24 @@ for i = 1:length(filenames)
 
     % Select the columns Xl_x, Xl_y, and Xl_z
     selectedData = T{:, {'Xl_x', 'Xl_y', 'Xl_z', 'Vl_x', 'Vl_y', 'Vl_z'}}';
-    selectedData = selectedData(:,1000:end-1000);
+    figure(1);
+    plot(selectedData(4,:)', '.-','Color',[0 0 1], 'LineWidth',1); hold on;
+    plot(selectedData(5,:)', '.-','Color',[1 0 0], 'LineWidth',1); hold on;
+    plot(selectedData(6,:)', '.-','Color',[0 1 0], 'LineWidth',1); hold on;
+    selectedData = selectedData(:,500:end-800);
+    figure(2);
+    plot(selectedData(4,:)', '.-','Color',[0 0 1], 'LineWidth',1); hold on;
+    plot(selectedData(5,:)', '.-','Color',[1 0 0], 'LineWidth',1); hold on;
+    plot(selectedData(6,:)', '.-','Color',[0 1 0], 'LineWidth',1); hold on;
 
     % Store the matrix in the cell array
     data{i} = selectedData;
 end
 
 % Define the path to save the .mat file
-savePath = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
+%savePath = '/Users/yanqu/Desktop/Thesis/MA/SEDS/ds-opt/datasets/3D_Yan_test.mat';
+%savePath = '/home/yan/MA/Demo_data/State_2.mat';
+savePath = '/home/yan/MA/Peeling_like/datasets/State_2.mat';
 % Save the data cell array to the specified path
 save(savePath, 'data');
 
